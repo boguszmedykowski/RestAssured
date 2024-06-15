@@ -4,6 +4,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import io.restassured.RestAssured;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static io.restassured.RestAssured.*;
@@ -12,6 +14,7 @@ import static org.hamcrest.Matchers.*;
 public class RestAssuredTest {
 
     private Faker faker;
+    private List<String> createdIds = new ArrayList<>();
 
     @BeforeClass
     public void setup() {
@@ -82,7 +85,7 @@ public class RestAssuredTest {
         // Wysłanie żądania POST na endpoint /objects
         System.out.println("Sending POST request with body: " + requestBody);
 
-        given()
+        String id = given()
                 .log().all() // Logowanie żądania
                 .body(requestBody) // Dodanie ciała żądania
                 .when()
@@ -96,6 +99,23 @@ public class RestAssuredTest {
                 .body("data.year", equalTo(expectedYear)) // Sprawdzenie, czy pole "year" ma oczekiwaną wartość
                 .body("data.price", equalTo((float) expectedPrice)) // Sprawdzenie, czy pole "price" ma oczekiwaną wartość
                 .body("data.'CPU model'", equalTo(expectedCpuModel)) // Sprawdzenie, czy pole "CPU model" ma oczekiwaną wartość
-                .body("data.'Hard disk size'", equalTo(expectedHardDiskSize)); // Sprawdzenie, czy pole "Hard disk size" ma oczekiwaną wartość
+                .body("data.'Hard disk size'", equalTo(expectedHardDiskSize)) // Sprawdzenie, czy pole "Hard disk size" ma oczekiwaną wartość
+                .extract().path("id"); // Pobranie ID stworzonego obiektu
+
+        createdIds.add(id); // Dodanie ID do listy stworzonych obiektów
+    }
+
+    @Test(dependsOnMethods = "testPostObject")
+    public void testDeleteObjects() {
+        // Usunięcie wszystkich stworzonych obiektów
+        for (String id : createdIds) {
+            given()
+                    .log().all() // Logowanie żądania
+                    .when()
+                    .delete("/objects/" + id)
+                    .then()
+                    .log().all() // Logowanie odpowiedzi
+                    .statusCode(200); // Oczekiwany kod odpowiedzi
+        }
     }
 }
