@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.*;
 public class RestAssuredTest {
 
     private Faker faker;
-    private List<String> createdIds = new ArrayList<>();
+    private final List<String> createdIds = new ArrayList<>(); // Deklaracja jako final
 
     @BeforeClass
     public void setup() {
@@ -27,7 +27,7 @@ public class RestAssuredTest {
                 .header("Content-Type", "application/json");
 
         // Inicjalizacja Faker z angielską lokalizacją
-        faker = new Faker(new Locale("en"));
+        faker = new Faker(Locale.ENGLISH); // Użycie Locale.ENGLISH
     }
 
     @Test
