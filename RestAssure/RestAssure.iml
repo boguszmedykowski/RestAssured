@@ -10,5 +10,6 @@
     <orderEntry type="library" name="testng" level="project" />
     <orderEntry type="library" name="io.rest.assured" level="project" />
     <orderEntry type="library" name="hamcrest" level="project" />
+    <orderEntry type="library" name="github.javafaker" level="project" />
   </component>
 </module>

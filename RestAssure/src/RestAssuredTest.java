@@ -1,11 +1,17 @@
+import com.github.javafaker.Faker;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import io.restassured.RestAssured;
+
+import java.util.Locale;
+
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
 public class RestAssuredTest {
+
+    private Faker faker;
 
     @BeforeClass
     public void setup() {
@@ -16,6 +22,9 @@ public class RestAssuredTest {
         RestAssured.requestSpecification = given()
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json");
+
+        // Inicjalizacja Faker z angielską lokalizacją
+        faker = new Faker(new Locale("en"));
     }
 
     @Test
@@ -38,34 +47,41 @@ public class RestAssuredTest {
     @DataProvider(name = "postData")
     public Object[][] createPostData() {
         return new Object[][] {
-                { """
-                {
-                   "name": "Apple MacBook Pro 16",
-                   "data": {
-                      "year": 2019,
-                      "price": 1849.99,
-                      "CPU model": "Intel Core i9",
-                      "Hard disk size": "1 TB"
-                   }
-                }
-                """, "Apple MacBook Pro 16", 2019, 1849.99f, "Intel Core i9", "1 TB" },
-                { """
-                {
-                   "name": "Apple iPhone 13",
-                   "data": {
-                      "year": 2021,
-                      "price": 999.99,
-                      "CPU model": "A15 Bionic",
-                      "Hard disk size": "128 GB"
-                   }
-                }
-                """, "Apple iPhone 13", 2021, 999.99f, "A15 Bionic", "128 GB" }
+                generateRandomData(),
+                generateRandomData()
         };
     }
 
+    private Object[] generateRandomData() {
+        String name = faker.commerce().productName();
+        int year = faker.number().numberBetween(2000, 2024);
+        double price = faker.number().randomDouble(2, 100, 5000);
+        String cpuModel = faker.commerce().material();
+        String hardDiskSize = faker.number().numberBetween(128, 2000) + " GB";
+
+        // Formatowanie ceny z kropką jako separatorem dziesiętnym
+        String formattedPrice = String.format(Locale.ENGLISH, "%.2f", price);
+
+        String requestBody = String.format(Locale.ENGLISH, """
+            {
+               "name": "%s",
+               "data": {
+                  "year": %d,
+                  "price": %s,
+                  "CPU model": "%s",
+                  "Hard disk size": "%s"
+               }
+            }
+            """, name, year, formattedPrice, cpuModel, hardDiskSize);
+
+        return new Object[] { requestBody, name, year, price, cpuModel, hardDiskSize };
+    }
+
     @Test(dataProvider = "postData")
-    public void testPostObject(String requestBody, String expectedName, int expectedYear, float expectedPrice, String expectedCpuModel, String expectedHardDiskSize) {
+    public void testPostObject(String requestBody, String expectedName, int expectedYear, double expectedPrice, String expectedCpuModel, String expectedHardDiskSize) {
         // Wysłanie żądania POST na endpoint /objects
+        System.out.println("Sending POST request with body: " + requestBody);
+
         given()
                 .log().all() // Logowanie żądania
                 .body(requestBody) // Dodanie ciała żądania
@@ -78,9 +94,8 @@ public class RestAssuredTest {
                 .body("id", notNullValue()) // Sprawdzenie, czy odpowiedź zawiera pole "id"
                 .body("name", equalTo(expectedName)) // Sprawdzenie, czy pole "name" ma oczekiwaną wartość
                 .body("data.year", equalTo(expectedYear)) // Sprawdzenie, czy pole "year" ma oczekiwaną wartość
-                .body("data.price", equalTo(expectedPrice)) // Sprawdzenie, czy pole "price" ma oczekiwaną wartość
+                .body("data.price", equalTo((float) expectedPrice)) // Sprawdzenie, czy pole "price" ma oczekiwaną wartość
                 .body("data.'CPU model'", equalTo(expectedCpuModel)) // Sprawdzenie, czy pole "CPU model" ma oczekiwaną wartość
                 .body("data.'Hard disk size'", equalTo(expectedHardDiskSize)); // Sprawdzenie, czy pole "Hard disk size" ma oczekiwaną wartość
     }
 }
-
