@@ -1,5 +1,5 @@
 Repozytorium zawiera testy api na stronie do nauki REST. Wykonuje podstawowe operacja, a następnie sprząta po sobie usuwając posty.
-
+Aby uruchomić testy uruchom plik RestAssure/src/test/java/RunCucumberTest.java
 
 Feature:API Testing with RestAssured and Cucumber
 Scenario:Get objects endpoint
