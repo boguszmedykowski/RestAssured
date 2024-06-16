@@ -1,5 +1,22 @@
-Repozytorium zawiera testy api na stronie do nauki REST. Wykonuje podstawowe operacja, a następnie sprząta po sobie usuwając posty.
-Aby uruchomić testy uruchom plik RestAssure/src/test/java/RunCucumberTest.java
+# RestAssured Cucumber API Testing
+
+Projekt do testowania API przy użyciu RestAssured i Cucumber.
+
+## Wymagania
+
+- Java 15 lub nowsza
+- Maven 3.6.3 lub nowszy
+- IntelliJ IDEA (opcjonalnie)
+
+## Uruchomienie
+
+1. Sklonuj repozytorium:
+    ```sh
+    git clone https://github.com/boguszmedykowski/RestAssured.git
+    ```
+2.  Uruchom plik RestAssure/src/test/java/RunCucumberTest.java
+
+
 
 Feature:API Testing with RestAssured and Cucumber
 Scenario:Get objects endpoint
