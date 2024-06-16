@@ -19,6 +19,7 @@ public class ApiSteps {
     private Response response;
     private Faker faker;
     private List<String> createdIds = new ArrayList<>();
+    private String requestBody; // Przechowuje ciało żądania
 
     public ApiSteps() {
         RestAssured.baseURI = "https://api.restful-api.dev";
@@ -58,7 +59,7 @@ public class ApiSteps {
         String hardDiskSize = faker.number().numberBetween(128, 2000) + " GB";
         String formattedPrice = String.format(Locale.ENGLISH, "%.2f", price);
 
-        String requestBody = String.format(Locale.ENGLISH, """
+        requestBody = String.format(Locale.ENGLISH, """
             {
                "name": "%s",
                "data": {
@@ -69,7 +70,10 @@ public class ApiSteps {
                }
             }
             """, name, year, formattedPrice, cpuModel, hardDiskSize);
+    }
 
+    @When("I send a POST request to create the object")
+    public void i_send_a_post_request_to_create_the_object() {
         response = given()
                 .log().all()
                 .body(requestBody)
@@ -105,11 +109,14 @@ public class ApiSteps {
                     .log().all()
                     .when()
                     .delete("/objects/" + id);
+
+            // Sprawdzenie odpowiedzi DELETE dla każdego obiektu
+            response.then().log().all().statusCode(200);
         }
     }
 
     @Then("the response status code is 200 for each delete")
     public void the_response_status_code_is_200_for_each_delete() {
-        response.then().log().all().statusCode(200);
+        // Metoda już wykonuje sprawdzenie statusu dla każdego usunięcia w pętli `for`
     }
 }
