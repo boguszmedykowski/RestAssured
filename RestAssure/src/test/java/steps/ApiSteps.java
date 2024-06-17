@@ -17,8 +17,8 @@ import static org.hamcrest.Matchers.*;
 public class ApiSteps {
 
     private Response response;
-    private Faker faker;
-    private List<String> createdIds = new ArrayList<>();
+    private final Faker faker;
+    private final List<String> createdIds = new ArrayList<>();
     private String requestBody; // Przechowuje ciało żądania
 
     public ApiSteps() {
@@ -118,5 +118,42 @@ public class ApiSteps {
     @Then("the response status code is 200 for each delete")
     public void the_response_status_code_is_200_for_each_delete() {
         // Metoda już wykonuje sprawdzenie statusu dla każdego usunięcia w pętli `for`
+    }
+
+    // Nowe testy sprawdzające błędne dane
+
+    @Given("an object with invalid data")
+    public void an_object_with_invalid_data() {
+        requestBody = """
+            {
+               "name": "",
+               "data": {
+                  "year": "invalid",
+                  "price": "not a number",
+                  "CPU model": "",
+                  "Hard disk size": "unknown"
+               }
+            }
+            """;
+    }
+
+    @When("I send a POST request with invalid data")
+    public void i_send_a_post_request_with_invalid_data() {
+        response = given()
+                .log().all()
+                .body(requestBody)
+                .when()
+                .post("/objects");
+    }
+
+    @Then("the response status code is {int} for invalid data")
+    public void the_response_status_code_is_for_invalid_data(Integer statusCode) {
+        response.then().log().all().statusCode(statusCode);
+    }
+
+    @Then("the response contains error message")
+    public void the_response_contains_error_message() {
+        response.then()
+                .body("error", notNullValue());
     }
 }

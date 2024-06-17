@@ -15,3 +15,9 @@ Feature: API Testing with RestAssured and Cucumber
     Given the IDs of created objects
     When I send a DELETE request for each object
     Then the response status code is 200 for each delete
+
+  Scenario: Create a new object with invalid data
+    Given an object with invalid data
+    When I send a POST request with invalid data
+    Then the response status code is 400 for invalid data
+    And the response contains error message
